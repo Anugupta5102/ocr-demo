@@ -35,7 +35,7 @@ This web application allows users to upload images containing text in both Hindi
 
 ## Deployment:
 
-This app is deployed and can be accessed at: **[https://bookish-goggles-vxw6xjgxpx7266v4-8501.app.github.dev/]**
+This app is deployed and can be accessed at: **[deployment link](https://bookish-goggles-vxw6xjgxpx7266v4-8501.app.github.dev/)**
 
 ## License:
 This project is licensed under the MIT License.
