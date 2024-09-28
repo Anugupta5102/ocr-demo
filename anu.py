@@ -1,15 +1,15 @@
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import easyocr
 from PIL import Image
 import streamlit as st
 import re
 
 
 # Function to extract text using Tesseract
-def extract_text_from_image(image, lang='eng+hin'):
+def extract_text_from_image(image):
     try:
-        extracted_text = pytesseract.image_to_string(image, lang=lang)
-        return extracted_text
+        reader = easyocr.Reader(['en', 'hi'])  # Specify languages
+        extracted_text = reader.readtext(image, detail=0)
+        return " ".join(extracted_text)  # Join list of texts
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
