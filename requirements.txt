@@ -1,5 +1,5 @@
 streamlit
-pytesseract
-Pillow
 easyocr
+Pillow
 numpy
+pyspellchecker
