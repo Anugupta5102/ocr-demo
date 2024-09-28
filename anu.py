@@ -1,10 +1,17 @@
 import easyocr
-from PIL import Image
+from PIL import Image, ImageEnhance
 import streamlit as st
 import re
 import numpy as np
+from spellchecker import SpellChecker
+
 
 reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
+spell = SpellChecker()
+
+def enhance_image(image):
+    enhancer = ImageEnhance.Contrast(image)
+    return enhancer.enhance(2.0)  # Increase contrast
 
 # Function to extract text using Tesseract
 def extract_text_from_image(image):
@@ -12,8 +19,7 @@ def extract_text_from_image(image):
          image_np = np.array(image)
         # Use EasyOCR to read the image
         result = reader.readtext(image_np, detail=0)
-        return " ".join(result)
-        
+        return "\n".join(result)   
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
@@ -45,11 +51,17 @@ def main():
     if uploaded_image:
         image = Image.open(uploaded_image)
         st.image(image, caption='Uploaded Image', use_column_width=True)
+
+        enhanced_image = enhance_image(image)
         
         # Extract text from the image
-        extracted_text = extract_text_from_image(image)
+        extracted_text = extract_text_from_image(enhanced_image)
         st.subheader("Extracted Text:")
         st.text(extracted_text)
+
+        corrected_text = correct_spelling(extracted_text)
+        st.subheader("Corrected Text:")
+        st.text(corrected_text)
         
         # Keyword Search
         search_keyword = st.text_input("Enter a keyword to search within the text")
