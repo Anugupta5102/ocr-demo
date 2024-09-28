@@ -3,6 +3,7 @@ from PIL import Image
 import streamlit as st
 import re
 
+
 # Function to extract text using Tesseract
 def extract_text_from_image(image, lang='eng+hin'):
     try:
