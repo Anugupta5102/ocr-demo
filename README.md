@@ -34,6 +34,18 @@ This web application allows users to upload images containing text in both Hindi
 5. Run the application: streamlit run anu.py
 
 
+## Screenshots
+
+![English Text](Screenshots/english_text.png)
+![Hindi Text](Screenshots/hindi_text.png)
+![Extracted Text](Screenshots/extracted_text.png)
+![Hindi Keyword](Screenshots/hindi_keyword.png)
+![OCR App](Screenshots/ocr_app.png)
+![Search Results](Screenshots/search_results.png)
+![Words](Screenshots/words.png)
+
+
+
 ## [Check out the OCR Demo App here!](https://ocr-demo-2.streamlit.app/)
 
 
