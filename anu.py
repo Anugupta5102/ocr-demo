@@ -10,9 +10,10 @@ reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
 def extract_text_from_image(image):
     try:
          image_np = np.array(image)
-        extracted_text = reader.readtext(image_np,detail=0)
-        text = " ".join([result[1] for result in extracted_text])
-        return text
+        # Use EasyOCR to read the image
+        result = reader.readtext(image_np, detail=0)
+        return " ".join(result)
+        
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
