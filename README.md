@@ -33,9 +33,9 @@ This web application allows users to upload images containing text in both Hindi
 
 5. Run the application: streamlit run anu.py
 
-## Deployment:
 
-This app is deployed and can be accessed at: **[deployment link](https://bookish-goggles-vxw6xjgxpx7266v4-8501.app.github.dev/)**
+## [Check out the OCR Demo App here!](https://ocr-demo-2.streamlit.app/)
+
 
 ## License:
 This project is licensed under the MIT License.
