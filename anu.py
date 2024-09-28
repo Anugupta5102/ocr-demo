@@ -1,4 +1,3 @@
-import pytesseract
 import easyocr
 from PIL import Image
 import streamlit as st
@@ -11,7 +10,7 @@ reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
 def extract_text_from_image(image):
     try:
          image_np = np.array(image)
-        extracted_text = reader.readtext(image_np)
+        extracted_text = reader.readtext(image_np,detail=0)
         text = " ".join([result[1] for result in extracted_text])
         return text
     except Exception as e:
