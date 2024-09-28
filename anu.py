@@ -3,6 +3,7 @@ from PIL import Image, ImageEnhance
 import streamlit as st
 import re
 import numpy as np
+import gc  # Import garbage collector
 from spellchecker import SpellChecker
 
 reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
@@ -11,6 +12,10 @@ spell = SpellChecker()
 def enhance_image(image):
     enhancer = ImageEnhance.Contrast(image)
     return enhancer.enhance(2.0)  # Increase contrast
+
+def resize_image(image, max_size=(1024, 1024)):
+    """Resize image to reduce memory usage."""
+    return image.resize(max_size, Image.ANTIALIAS)
 
 # Function to extract text using EasyOCR
 def extract_text_from_image(image):
