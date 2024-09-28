@@ -3,3 +3,6 @@ easyocr
 Pillow
 numpy
 pyspellchecker
+regex
+
+
