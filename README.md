@@ -23,7 +23,7 @@ This web application allows users to upload images containing text in both Hindi
   
   ```pip install pytesseract```
  
-  ```pip instal Pillow```
+  ```pip install Pillow```
   
   ```pip install streamlit```
   
@@ -31,7 +31,7 @@ This web application allows users to upload images containing text in both Hindi
   
   ```pip install transformers```
 
-5. Run the application: streamlit run app.py
+5. Run the application: streamlit run anu.py
 
 ## Deployment:
 
