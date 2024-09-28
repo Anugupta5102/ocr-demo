@@ -5,7 +5,6 @@ import re
 import numpy as np
 from spellchecker import SpellChecker
 
-
 reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
 spell = SpellChecker()
 
@@ -13,21 +12,27 @@ def enhance_image(image):
     enhancer = ImageEnhance.Contrast(image)
     return enhancer.enhance(2.0)  # Increase contrast
 
-# Function to extract text using Tesseract
+# Function to extract text using EasyOCR
 def extract_text_from_image(image):
     try:
-         image_np = np.array(image)
+        image_np = np.array(image)
         # Use EasyOCR to read the image
         result = reader.readtext(image_np, detail=0)
-        return "\n".join(result)   
+        # Join the extracted words with a new line
+        return "\n".join(result)  # Display each word in a new line
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
 # Function to search for keywords in the extracted text
 def search_in_text(extracted_text, keyword):
-    matches = re.finditer(keyword, extracted_text, re.IGNORECASE)
-    highlighted_text = extracted_text
+    # Normalize the text and the keyword by removing extra spaces
+    normalized_text = extracted_text.strip().replace('\n', ' ').replace('  ', ' ')
+    normalized_keyword = keyword.strip()
     
+    # Perform the search in the normalized text
+    matches = re.finditer(re.escape(normalized_keyword), normalized_text, re.IGNORECASE)
+    
+    highlighted_text = extracted_text
     for match in matches:
         start, end = match.span()
         highlighted_text = (highlighted_text[:start] + f"<mark>{highlighted_text[start:end]}</mark>" + highlighted_text[end:])
@@ -56,12 +61,8 @@ def main():
         
         # Extract text from the image
         extracted_text = extract_text_from_image(enhanced_image)
-        st.subheader("Extracted Text:")
+        st.subheader("Extracted Text (Each Word on a New Line):")
         st.text(extracted_text)
-
-        corrected_text = correct_spelling(extracted_text)
-        st.subheader("Corrected Text:")
-        st.text(corrected_text)
         
         # Keyword Search
         search_keyword = st.text_input("Enter a keyword to search within the text")
