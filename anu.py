@@ -1,15 +1,19 @@
+import pytesseract
 import easyocr
 from PIL import Image
 import streamlit as st
 import re
+import numpy as np
 
+reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
 
 # Function to extract text using Tesseract
 def extract_text_from_image(image):
     try:
-        reader = easyocr.Reader(['en', 'hi'])  # Specify languages
-        extracted_text = reader.readtext(image, detail=0)
-        return " ".join(extracted_text)  # Join list of texts
+         image_np = np.array(image)
+        extracted_text = reader.readtext(image_np)
+        text = " ".join([result[1] for result in extracted_text])
+        return text
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
