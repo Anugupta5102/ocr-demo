@@ -1,40 +1,41 @@
 import easyocr
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageOps
 import streamlit as st
 import re
 import numpy as np
 import gc  # Import garbage collector
 from spellchecker import SpellChecker
 
-reader = easyocr.Reader(['en', 'hi'])  # Specify the languages
-spell = SpellChecker()
-
-def enhance_image(image):
-    enhancer = ImageEnhance.Contrast(image)
-    return enhancer.enhance(2.0)  # Increase contrast
-
-def resize_image(image, max_size=(1024, 1024)):
-    """Resize image to reduce memory usage."""
-    return image.resize(max_size, Image.ANTIALIAS)
+# Function to enhance and resize the image to reduce memory usage
+def preprocess_image(image, max_size=(1024, 1024)):
+    try:
+        # Convert to grayscale to reduce memory usage
+        image = ImageOps.grayscale(image)
+        # Resize the image to a smaller size
+        image = image.resize(max_size, Image.ANTIALIAS)
+        return image
+    except Exception as e:
+        return f"Error processing image: {str(e)}"
 
 # Function to extract text using EasyOCR
 def extract_text_from_image(image):
     try:
+        reader = easyocr.Reader(['en', 'hi'], gpu=False)  # Load OCR reader only when needed
         image_np = np.array(image)
         # Use EasyOCR to read the image
         result = reader.readtext(image_np, detail=0)
-        # Join the extracted words with a new line
-        return "\n".join(result)  # Display each word in a new line
+        # Free up memory after OCR processing
+        gc.collect()
+        return "\n".join(result)  # Display each word on a new line
     except Exception as e:
         return f"Error occurred while extracting text: {str(e)}"
 
 # Function to search for keywords in the extracted text
 def search_in_text(extracted_text, keyword):
-    # Normalize the text and the keyword by removing extra spaces
     normalized_text = extracted_text.strip().replace('\n', ' ').replace('  ', ' ')
     normalized_keyword = keyword.strip()
     
-    # Perform the search in the normalized text
+    # Perform the search
     matches = re.finditer(re.escape(normalized_keyword), normalized_text, re.IGNORECASE)
     
     highlighted_text = extracted_text
@@ -48,7 +49,7 @@ def search_in_text(extracted_text, keyword):
 
 # Main app with Streamlit
 def main():
-    st.title("OCR for Hindi and English Text")
+    st.title("Optimized OCR for Hindi and English Text")
     
     st.write("""
     Upload an image that contains both Hindi and English text, and this app will extract the text using OCR.
@@ -62,10 +63,11 @@ def main():
         image = Image.open(uploaded_image)
         st.image(image, caption='Uploaded Image', use_column_width=True)
 
-        enhanced_image = enhance_image(image)
+        # Preprocess the image (resize and convert to grayscale)
+        preprocessed_image = preprocess_image(image)
         
         # Extract text from the image
-        extracted_text = extract_text_from_image(enhanced_image)
+        extracted_text = extract_text_from_image(preprocessed_image)
         st.subheader("Extracted Text (Each Word on a New Line):")
         st.text(extracted_text)
         
@@ -79,6 +81,11 @@ def main():
                 st.markdown(search_results, unsafe_allow_html=True)
             else:
                 st.write(f"No matches found for '{search_keyword}'.")
+        
+        # Free up memory after the process
+        del image, preprocessed_image, extracted_text
+        gc.collect()
 
 if __name__ == "__main__":
     main()
+
