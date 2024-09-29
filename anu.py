@@ -6,45 +6,32 @@ import numpy as np
 import gc  # Import garbage collector
 from spellchecker import SpellChecker
 
-# Initialize EasyOCR reader for English and Hindi
-reader = easyocr.Reader(['en', 'hi'], gpu=False)
-
 # Function to enhance and resize the image to reduce memory usage
 def preprocess_image(image, max_size=(1024, 1024)):
-    """Convert image to grayscale and resize it."""
     try:
         # Convert to grayscale to reduce memory usage
         image = ImageOps.grayscale(image)
-        # Resize the image to a smaller size
-        image = image.resize(max_size, Image.ANTIALIAS)
+        # Resize the image to a smaller size using LANCZOS
+        image = image.resize(max_size, Image.LANCZOS)
         return image
     except Exception as e:
-        st.error(f"Error processing image: {str(e)}")
-        return None
+        return None  # Return None in case of error
 
 # Function to extract text using EasyOCR
 def extract_text_from_image(image):
-    """Extract text from the processed image using EasyOCR."""
-    if image is None:
-        return "No image provided."
-        
     try:
+        reader = easyocr.Reader(['en', 'hi'], gpu=False)  # Load OCR reader only when needed
         image_np = np.array(image)
         # Use EasyOCR to read the image
         result = reader.readtext(image_np, detail=0)
         # Free up memory after OCR processing
         gc.collect()
-        return "\n".join(result) if result else "No text detected."
+        return "\n".join(result)  # Display each word on a new line
     except Exception as e:
-        st.error(f"Error occurred while extracting text: {str(e)}")
-        return "Error occurred during text extraction."
+        return f"Error occurred while extracting text: {str(e)}"
 
 # Function to search for keywords in the extracted text
 def search_in_text(extracted_text, keyword):
-    """Search for the keyword in the extracted text and highlight it."""
-    if not extracted_text:
-        return None
-
     normalized_text = extracted_text.strip().replace('\n', ' ').replace('  ', ' ')
     normalized_keyword = keyword.strip()
     
@@ -54,11 +41,11 @@ def search_in_text(extracted_text, keyword):
     highlighted_text = extracted_text
     for match in matches:
         start, end = match.span()
-        highlighted_text = (highlighted_text[:start] + 
-                            f"<mark>{highlighted_text[start:end]}</mark>" + 
-                            highlighted_text[end:])
+        highlighted_text = (highlighted_text[:start] + f"<mark>{highlighted_text[start:end]}</mark>" + highlighted_text[end:])
     
-    return highlighted_text if "<mark>" in highlighted_text else None
+    if "<mark>" in highlighted_text:
+        return highlighted_text
+    return None
 
 # Main app with Streamlit
 def main():
@@ -73,34 +60,33 @@ def main():
     uploaded_image = st.file_uploader("Upload an image", type=['jpeg', 'png', 'jpg'])
     
     if uploaded_image:
-        try:
-            image = Image.open(uploaded_image)
-            st.image(image, caption='Uploaded Image', use_column_width=True)
+        image = Image.open(uploaded_image)
+        st.image(image, caption='Uploaded Image', use_column_width=True)
 
-            # Preprocess the image (resize and convert to grayscale)
-            preprocessed_image = preprocess_image(image)
-            if preprocessed_image is not None:
-                # Extract text from the image
-                extracted_text = extract_text_from_image(preprocessed_image)
-                st.subheader("Extracted Text (Each Word on a New Line):")
-                st.text(extracted_text)
-                
-                # Keyword Search
-                search_keyword = st.text_input("Enter a keyword to search within the text")
-                
-                if search_keyword:
-                    search_results = search_in_text(extracted_text, search_keyword)
-                    if search_results:
-                        st.subheader(f"Search Results for '{search_keyword}':")
-                        st.markdown(search_results, unsafe_allow_html=True)
-                    else:
-                        st.write(f"No matches found for '{search_keyword}'.")
+        # Preprocess the image (resize and convert to grayscale)
+        preprocessed_image = preprocess_image(image)
         
-        except Exception as e:
-            st.error(f"Error processing the uploaded image: {str(e)}")
-        
+        if preprocessed_image is not None:  # Check if preprocessing was successful
+            # Extract text from the image
+            extracted_text = extract_text_from_image(preprocessed_image)
+            st.subheader("Extracted Text (Each Word on a New Line):")
+            st.text(extracted_text)
+            
+            # Keyword Search
+            search_keyword = st.text_input("Enter a keyword to search within the text")
+            
+            if search_keyword:
+                search_results = search_in_text(extracted_text, search_keyword)
+                if search_results:
+                    st.subheader(f"Search Results for '{search_keyword}':")
+                    st.markdown(search_results, unsafe_allow_html=True)
+                else:
+                    st.write(f"No matches found for '{search_keyword}'.")
+        else:
+            st.error("Error processing image. Please upload a valid image.")
+
         # Free up memory after the process
-        del image, preprocessed_image, extracted_text
+        del image, preprocessed_image
         gc.collect()
 
 if __name__ == "__main__":
